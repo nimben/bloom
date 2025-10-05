@@ -64,6 +64,14 @@ const REGIONAL_FLOWER_MAPPINGS = {
   }
 };
 
+// Provide a general fallback region mapping to avoid undefined access
+REGIONAL_FLOWER_MAPPINGS['general'] = {
+  spring: ['tulip', 'daisy', 'lilac'],
+  summer: ['sunflower', 'rose', 'lavender'],
+  autumn: ['chrysanthemum', 'aster', 'cosmos'],
+  winter: ['camellia', 'winter jasmine', 'cyclamen']
+};
+
 /**
  * Get region identifier based on coordinates
  */
@@ -133,7 +141,7 @@ export async function fetchFlowerImagesFromWikimedia(plantName, season, limit = 
   try {
     const query = `${plantName} flower`;
     const response = await fetch(
-      `${WIKIMEDIA_BASE_URL}?action=query&format=json&list=search&srsearch=${encodeURIComponent(query)}&srnamespace=6&srlimit=${limit}`
+      `${WIKIMEDIA_BASE_URL}?action=query&format=json&list=search&srsearch=${encodeURIComponent(query)}&srnamespace=6&srlimit=${limit}&origin=*`
     );
     
     if (!response.ok) {
@@ -145,20 +153,46 @@ export async function fetchFlowerImagesFromWikimedia(plantName, season, limit = 
     if (!data.query || !data.query.search) {
       return getMockImages(plantName, season);
     }
-    
-    return data.query.search.map(item => ({
-      id: item.title,
-      url: `https://commons.wikimedia.org/wiki/File:${encodeURIComponent(item.title)}`,
-      thumbnail: `https://commons.wikimedia.org/w/thumb.php?f=${encodeURIComponent(item.title)}&w=300`,
-      alt: item.title,
-      photographer: 'Wikimedia Commons',
-      photographerUrl: 'https://commons.wikimedia.org',
-      source: 'wikimedia'
-    }));
+
+    const titles = data.query.search
+      .map(it => it.title && it.title.startsWith('File:') ? it.title : `File:${it.title}`)
+      .slice(0, limit);
+    const details = await Promise.all(
+      titles.map(async (title) => {
+        const infoRes = await fetch(
+          `${WIKIMEDIA_BASE_URL}?action=query&format=json&prop=imageinfo&redirects=1&titles=${encodeURIComponent(title)}&iiprop=url|extmetadata|canonicaltitle|commonmetadata|mediatype&iiurlwidth=300&origin=*`
+        );
+        if (!infoRes.ok) throw new Error('Wikimedia imageinfo error');
+        const info = await infoRes.json();
+        const pages = info?.query?.pages || {};
+        const page = Object.values(pages)[0];
+        const ii = page?.imageinfo?.[0];
+        return {
+          id: page?.title || title,
+          url: (ii?.descriptionurl) || `https://commons.wikimedia.org/wiki/${encodeURIComponent(page?.title || title)}`,
+          thumbnail: ii?.thumburl || ii?.url || null,
+          alt: page?.title || title,
+          photographer: 'Wikimedia Commons',
+          photographerUrl: 'https://commons.wikimedia.org',
+          source: 'wikimedia'
+        };
+      })
+    );
+
+    return details.filter(img => !!img.thumbnail);
   } catch (error) {
     console.error('Error fetching images from Wikimedia:', error);
     return getMockImages(plantName, season);
   }
+}
+
+function shuffleArray(array) {
+  const arr = array.slice();
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
 }
 
 /**
@@ -175,6 +209,8 @@ export async function getRegionalFlowerImages(latitude, longitude, season, plant
   } else {
     flowerKeywords = regionFlowers[season.toLowerCase()] || regionFlowers.spring;
   }
+  // Add randomness to keywords to diversify images between popups
+  flowerKeywords = shuffleArray(flowerKeywords);
   
   // Add plant-specific keywords if available
   if (plantInfo && plantInfo.primarySpecies) {
@@ -184,6 +220,7 @@ export async function getRegionalFlowerImages(latitude, longitude, season, plant
   // Try to fetch images for each keyword
   const allImages = [];
   
+  // Randomly pick up to 3 keywords
   for (const keyword of flowerKeywords.slice(0, 3)) {
     try {
       const unsplashImages = await fetchFlowerImagesFromUnsplash(keyword, season, 2);
@@ -200,9 +237,10 @@ export async function getRegionalFlowerImages(latitude, longitude, season, plant
   // Remove duplicates and limit results
   const uniqueImages = allImages.filter((image, index, self) => 
     index === self.findIndex(img => img.id === image.id)
-  ).slice(0, 6);
+  );
+  const randomized = shuffleArray(uniqueImages).slice(0, 6);
   
-  return uniqueImages.length > 0 ? uniqueImages : getMockImages(plantInfo?.primarySpecies || 'flower', season);
+  return randomized.length > 0 ? randomized : getMockImages(plantInfo?.primarySpecies || 'flower', season);
 }
 
 /**
