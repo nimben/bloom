@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { sendChat } from '../services/bloomBackend';
 
 function ChatModal({ isOpen, onClose }) {
   const [messages, setMessages] = useState([
@@ -11,35 +12,34 @@ function ChatModal({ isOpen, onClose }) {
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
+  const [isSending, setIsSending] = useState(false);
 
-  const handleSendMessage = () => {
-    if (inputMessage.trim()) {
-      const newMessage = {
-        id: messages.length + 1,
-        text: inputMessage,
-        sender: 'user',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, newMessage]);
-      setInputMessage('');
+  const handleSendMessage = async () => {
+    if (!inputMessage.trim() || isSending) return;
+    const userMsg = {
+      id: messages.length + 1,
+      text: inputMessage,
+      sender: 'user',
+      timestamp: new Date()
+    };
+    setMessages(prev => [...prev, userMsg]);
+    setInputMessage('');
+    setIsSending(true);
 
-      // Simulate bot response
-      setTimeout(() => {
-        const responses = [
-          "That's a great question about flowers! Spring is typically the peak blooming season for many species.",
-          "Interesting! Did you know that cherry blossoms in Japan bloom for only about two weeks each year?",
-          "Flowers have fascinating adaptations! Some bloom only at night to attract moths and bats.",
-          "The NDVI index helps us measure plant health and blooming intensity from satellite data.",
-          "Different flowers have evolved to bloom in specific seasons to maximize their chances of pollination."
-        ];
-        const botResponse = {
-          id: messages.length + 2,
-          text: responses[Math.floor(Math.random() * responses.length)],
-          sender: 'bot',
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, botResponse]);
-      }, 1000);
+    // Optimistic typing indicator
+    const typingId = userMsg.id + 1;
+    setMessages(prev => [
+      ...prev,
+      { id: typingId, text: 'Thinking…', sender: 'bot', timestamp: new Date(), typing: true }
+    ]);
+
+    try {
+      const reply = await sendChat(userMsg.text);
+      setMessages(prev => prev.map(m => m.id === typingId ? { ...m, text: reply, typing: false, timestamp: new Date() } : m));
+    } catch (e) {
+      setMessages(prev => prev.map(m => m.id === typingId ? { ...m, text: 'Sorry, I could not fetch a reply. Please try again.', typing: false, timestamp: new Date() } : m));
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -104,7 +104,7 @@ function ChatModal({ isOpen, onClose }) {
                         : 'bg-gray-100 text-gray-800'
                     }`}
                   >
-                    <p className="text-sm">{message.text}</p>
+                    <p className="text-sm whitespace-pre-wrap">{message.text}</p>
                     <p className={`text-xs mt-1 ${
                       message.sender === 'user' ? 'text-white/70' : 'text-gray-500'
                     }`}>
@@ -130,7 +130,7 @@ function ChatModal({ isOpen, onClose }) {
                   onClick={handleSendMessage}
                   className="px-4 py-2 bg-gradient-to-r from-blossom-pink to-floral-rose text-white rounded-full hover:shadow-lg transform hover:scale-105 transition-all duration-200"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className={`w-4 h-4 ${isSending ? 'opacity-60' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                   </svg>
                 </button>

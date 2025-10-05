@@ -1,0 +1,87 @@
+species,country,bloom_start,bloom_end,notes,lat,lon
+Mango,India,February,April,Peak bloom in south India,20.5937,78.9629
+Orange,USA,March,May,Two flowering seasons,37.0902,-95.7129
+Rose,France,April,June,Common in temperate zones,46.2276,2.2137
+Apple,USA,April,May,Varies by region,37.0902,-95.7129
+Cherry,Japan,March,April,Famous for sakura season,36.2048,138.2529
+Lavender,France,June,August,Grown for essential oils,46.2276,2.2137
+Tulip,Netherlands,April,May,Keukenhof festival,52.1326,5.2913
+Sunflower,Brazil,August,October,Requires full sun,14.2350,-51.9253
+Jasmine,India,June,September,Fragrant flowers,20.5937,78.9629
+Peach,USA,March,May,Early spring bloom,37.0902,-95.7129
+Lily,Italy,May,July,Popular in gardens,41.8719,12.5674
+Orchid,Thailand,July,September,Tropical flowering,15.8700,100.9925
+Daffodil,UK,March,April,Spring bulb flower,55.3781,-3.4360
+Pine,Canada,May,June,Evergreen tree,56.1304,-106.3468
+Maple,Canada,April,May,Autumn foliage,56.1304,-106.3468
+Cactus,Mexico,March,May,Desert bloom,23.6345,-102.5528
+Peony,China,April,June,Traditional ornamental,35.8617,104.1954
+Hydrangea,Japan,June,August,Color depends on soil,36.2048,138.2529
+Plum,China,February,April,Early spring fruit,35.8617,104.1954
+Grape,Italy,May,July,Widely cultivated,41.8719,12.5674
+Blueberry,USA,May,July,Northern varieties,37.0902,-95.7129
+Raspberry,USA,June,August,Summer fruit,37.0902,-95.7129
+Blackberry,UK,July,September,Wild and cultivated,55.3781,-3.4360
+Kiwi,New Zealand,October,December,Fruit crop,-40.9006,174.8860
+Papaya,Brazil,All Year,All Year,Tropical fruit,14.2350,-51.9253
+Banana,India,All Year,All Year,Tropical staple,20.5937,78.9629
+Coconut,Philippines,All Year,All Year,Coastal regions,12.8797,121.7740
+Pomegranate,India,August,October,Drought tolerant,20.5937,78.9629
+Fig,Tunisia,May,July,Dry climate tree,33.8869,9.5375
+Olive,Greece,April,June,Mediterranean fruit,39.0742,21.8243
+Clematis,France,May,July,Climbing ornamental,46.2276,2.2137
+Magnolia,USA,March,May,Fragrant spring flowers,37.0902,-95.7129
+Camellia,Japan,January,March,Winter flowering shrub,36.2048,138.2529
+Hibiscus,Mexico,June,September,Tropical flowers,23.6345,-102.5528
+Marigold,India,October,December,Festival flower,20.5937,78.9629
+Geranium,Netherlands,May,July,Common garden flower,52.1326,5.2913
+Dahlia,Mexico,July,October,Popular in bouquets,23.6345,-102.5528
+Chrysanthemum,China,September,November,Autumn ornamental,35.8617,104.1954
+Begonia,Brazil,June,September,Indoor/outdoor flower,14.2350,-51.9253
+Violet,France,March,May,Delicate spring flower,46.2276,2.2137
+Iris,Netherlands,April,June,Keukenhof favorite,52.1326,5.2913
+Azalea,Japan,April,June,Spring flowering shrub,36.2048,138.2529
+Freesia,South Africa,September,November,Fragrant bulb flower,-30.5595,22.9375
+Bougainvillea,India,All Year,All Year,Climbing ornamental,20.5937,78.9629
+Zinnia,Mexico,June,September,Annual garden flower,23.6345,-102.5528
+Crocus,Switzerland,March,April,Early spring bulb,46.8182,8.2275
+Almond,Spain,February,March,Early nut tree bloom,40.4637,-3.7492
+Walnut,USA,April,May,Temperate tree,37.0902,-95.7129
+Chestnut,Italy,May,June,Mediterranean nut tree,41.8719,12.5674
+Rhododendron,India,April,June,Himalayan shrub,20.5937,78.9629
+Saffron,Spain,October,November,Precious spice,40.4637,-3.7492
+Tamarind,India,March,May,Tropical tree,20.5937,78.9629
+Guava,Brazil,June,August,Tropical fruit,14.2350,-51.9253
+Lychee,China,May,July,Summer fruit,35.8617,104.1954
+Passionfruit,Brazil,July,September,Tropical vine,14.2350,-51.9253
+Rambutan,Indonesia,June,August,Tropical fruit,-0.7893,113.9213
+Jackfruit,India,March,June,Tropical tree,20.5937,78.9629
+Durian,Malaysia,June,August,Tropical fruit,4.2105,101.9758
+Avocado,Mexico,March,May,Fruit tree,23.6345,-102.5528
+Cacao,Cote d'Ivoire,May,July,Tropical cash crop,7.5399,-5.5471
+Coffee,Brazil,September,November,Coffee plant,14.2350,-51.9253
+Tea,China,March,May,Tea plantation,35.8617,104.1954
+Sugarcane,India,October,March,Staple crop,20.5937,78.9629
+Wisteria,Japan,April,May,Climbing vine,36.2048,138.2529
+Hellebore,Germany,January,March,Winter flower,51.1657,10.4515
+Foxglove,UK,May,July,Shade garden plant,55.3781,-3.4360
+Snapdragon,USA,June,September,Common garden plant,37.0902,-95.7129
+Poppy,France,May,July,Remembrance flower,46.2276,2.2137
+Morning Glory,India,July,September,Climbing vine,20.5937,78.9629
+Sweet Pea,UK,April,June,Fragrant climbing flower,55.3781,-3.4360
+Coleus,Thailand,May,August,Colorful foliage,15.8700,100.9925
+Impatiens,India,June,October,Shade loving,20.5937,78.9629
+Petunia,Netherlands,May,September,Annual bedding plant,52.1326,5.2913
+Begonia Rex,Indonesia,May,August,Indoor foliage plant,-0.7893,113.9213
+Celosia,Nigeria,June,September,Bright summer flowers,9.0820,8.6753
+Amaranth,India,July,September,Edible and ornamental,20.5937,78.9629
+Caladium,Brazil,June,September,Colorful leaves,14.2350,-51.9253
+Coleus Scutellarioides,Thailand,May,July,Foliage plant,15.8700,100.9925
+Dandelion,France,March,May,Wildflower,46.2276,2.2137
+Goldenrod,USA,August,October,Perennial bloom,37.0902,-95.7129
+Hawthorn,UK,April,June,Flowering tree,55.3781,-3.4360
+Eucalyptus,Australia,September,November,Evergreen tree,-25.2744,133.7751
+Bottlebrush,Australia,October,December,Red flowering tree,-25.2744,133.7751
+Kangaroo Paw,Australia,September,November,Unique flower,-25.2744,133.7751
+Waratah,Australia,October,December,State flower,-25.2744,133.7751
+
