@@ -51,8 +51,8 @@ class DataCache {
    * Generate cache key for location and data type
    */
   generateKey(latitude, longitude, dataType) {
-    const roundedLat = Math.round(latitude * 100) / 100;
-    const roundedLon = Math.round(longitude * 100) / 100;
+    const roundedLat = Math.round(latitude * 1000) / 1000;
+    const roundedLon = Math.round(longitude * 1000) / 1000;
     return `${dataType}_${roundedLat}_${roundedLon}`;
   }
 

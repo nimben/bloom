@@ -5,6 +5,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 // Import the actual service functions
 import { getBloomData as serviceGetBloomData } from '../services/bloomDataService';
+import { clearAllCache } from '../services/dataCache';
 
 const initializeService = async () => {
   try {
@@ -253,12 +254,16 @@ function WorldMapSection() {
         setLoading(true);
         await initializeService();
         
-        // Load bloom data for sample locations
+        // Clear cache to ensure fresh data for each location
+        clearAllCache();
+        
+        // Load bloom data for sample locations with force refresh
         const locationPromises = sampleLocations.map(async (location) => {
           try {
             const bloomData = await getBloomData(location.position[0], location.position[1], {
               includeImages: true,
-              includeTrends: false
+              includeTrends: false,
+              forceRefresh: true
             });
             
             return {
@@ -306,10 +311,11 @@ function WorldMapSection() {
       
       console.log(`Map clicked at: ${latlng.lat}, ${latlng.lng}`);
       
-      // Get bloom data for clicked location
+      // Get bloom data for clicked location with force refresh
       const bloomData = await getBloomData(latlng.lat, latlng.lng, {
         includeImages: true,
-        includeTrends: false
+        includeTrends: false,
+        forceRefresh: true
       });
       
       console.log('Bloom data received:', bloomData);
@@ -433,11 +439,11 @@ function WorldMapSection() {
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <div className="bg-white rounded-2xl shadow-2xl overflow-hidden h-80 sm:h-96 md:h-[500px] relative z-0">
+          <div className="bg-white rounded-2xl shadow-2xl overflow-hidden h-80 sm:h-96 md:h-[500px] relative z-0" style={{ position: 'relative' }}>
             <MapContainer
               center={[20, 0]}
               zoom={2}
-              style={{ height: '100%', width: '100%' }}
+              style={{ height: '100%', width: '100%', position: 'relative' }}
               zoomControl={true}
             >
               <TileLayer
@@ -503,7 +509,11 @@ function WorldMapSection() {
                               </div>
                               <div className="flex justify-between">
                                 <span>Peak:</span>
-                                <span className="font-medium">{location.bloomData.phenology?.peakBloom || 'Unknown'}</span>
+                                <span className="font-medium">
+                                  {typeof location.bloomData.phenology?.peakBloom === 'object' 
+                                    ? location.bloomData.phenology.peakBloom.period || 'Unknown'
+                                    : location.bloomData.phenology?.peakBloom || 'Unknown'}
+                                </span>
                               </div>
                               <div className="flex justify-between">
                                 <span>End:</span>
@@ -632,7 +642,11 @@ function WorldMapSection() {
                             </div>
                             <div className="flex justify-between">
                               <span>Peak Bloom:</span>
-                              <span className="font-medium">{selectedLocation.bloomData.phenology.peakBloom || 'Unknown'}</span>
+                              <span className="font-medium">
+                                {typeof selectedLocation.bloomData.phenology?.peakBloom === 'object' 
+                                  ? selectedLocation.bloomData.phenology.peakBloom.period || 'Unknown'
+                                  : selectedLocation.bloomData.phenology?.peakBloom || 'Unknown'}
+                              </span>
                             </div>
                             <div className="flex justify-between">
                               <span>End of Season:</span>
