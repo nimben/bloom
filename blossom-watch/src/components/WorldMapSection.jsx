@@ -3,6 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { fetchBloomMap, fetchBloomForecast } from '../services/bloomBackend';
+import { getRegionalFlowerImages } from '../services/imageApi';
+import BlossomLoader from './BlossomLoader';
 // Import the actual service functions
 import { getBloomData as serviceGetBloomData } from '../services/bloomDataService';
 import { clearAllCache } from '../services/dataCache';
@@ -237,6 +240,8 @@ function WorldMapSection() {
   const [bloomLocations, setBloomLocations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [ndviTileUrl, setNdviTileUrl] = useState(null);
+  const [inFlightController, setInFlightController] = useState(null);
 
   // Sample locations for initial load
   const sampleLocations = [
@@ -308,15 +313,33 @@ function WorldMapSection() {
     try {
       setLoading(true);
       setError(null);
+
+      // Cancel any previous in-flight fetches
+      if (inFlightController) {
+        try { inFlightController.abort(); } catch (_) {}
+      }
+      const controller = new AbortController();
+      setInFlightController(controller);
       
       console.log(`Map clicked at: ${latlng.lat}, ${latlng.lng}`);
       
-      // Get bloom data for clicked location with force refresh
-      const bloomData = await getBloomData(latlng.lat, latlng.lng, {
-        includeImages: true,
+      // Fast path: fetch core bloom data without images first
+      const year = new Date().getUTCFullYear();
+      const bloomCorePromise = getBloomData(latlng.lat, latlng.lng, {
+        includeImages: false,
         includeTrends: false,
         forceRefresh: true
       });
+      const backendMapPromise = fetchBloomMap(latlng.lat, latlng.lng, year).catch((e) => {
+        console.warn('Backend /bloom-map failed', e);
+        return null;
+      });
+      const backendForecastPromise = fetchBloomForecast(6).catch((e) => {
+        console.warn('Backend /bloom-forecast failed', e);
+        return null;
+      });
+      const bloomData = await bloomCorePromise;
+      const [backendMap, backendForecast] = await Promise.all([backendMapPromise, backendForecastPromise]);
       
       console.log('Bloom data received:', bloomData);
       
@@ -331,13 +354,42 @@ function WorldMapSection() {
         season: bloomData.ndvi?.season || 'Spring',
         description: bloomData.plantInfo?.description || 'Local vegetation',
         plantName: bloomData.plantInfo?.primarySpecies || 'Mixed Vegetation',
-        bloomScore: bloomData.bloomStatus?.confidence || 60
+        bloomScore: bloomData.bloomStatus?.confidence || 60,
+        backend: backendMap ? {
+          map: backendMap,
+          forecast: backendForecast?.forecast || []
+        } : null
       };
       
       console.log('Created location object:', clickedLocation);
       
       setSelectedLocation(clickedLocation);
       setShowPopup(true);
+
+      // Update NDVI overlay tile if available
+      if (backendMap?.map_url) {
+        setNdviTileUrl(backendMap.map_url);
+      } else {
+        setNdviTileUrl(null);
+      }
+
+      // Fetch images in the background to improve perceived latency
+      ;(async () => {
+        try {
+          const images = await getRegionalFlowerImages(latlng.lat, latlng.lng, clickedLocation.season, clickedLocation.plantName ? { primarySpecies: clickedLocation.plantName } : null);
+          if (!controller.signal.aborted) {
+            setSelectedLocation(prev => prev ? {
+              ...prev,
+              bloomData: {
+                ...prev.bloomData,
+                flowerImages: images
+              }
+            } : prev);
+          }
+        } catch (e) {
+          console.warn('Async image fetch failed', e);
+        }
+      })();
 
       // Add bloom effect
       const newEffect = {
@@ -410,13 +462,7 @@ function WorldMapSection() {
           </p>
         </motion.div>
 
-        {/* Loading State */}
-        {loading && (
-          <div className="text-center py-8">
-            <div className="animate-spin w-12 h-12 border-4 border-blossom-pink border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading bloom data...</p>
-          </div>
-        )}
+        {/* Loading State moved to map container overlay */}
 
         {/* Error State */}
         {error && (
@@ -450,6 +496,12 @@ function WorldMapSection() {
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               />
+              {ndviTileUrl && (
+                <TileLayer
+                  url={ndviTileUrl}
+                  opacity={0.5}
+                />
+              )}
               
               <MapClickHandler onLocationClick={handleLocationClick} />
               
@@ -544,6 +596,26 @@ function WorldMapSection() {
                 </Marker>
               ))}
             </MapContainer>
+            {/* Local overlay inside map bounds only */}
+            {loading && (
+              <>
+                {/* Glassy day-to-night animated overlay above map, below animation */}
+                <style>{`
+                  @keyframes dayNightCycle {
+                    0% { background: radial-gradient(120% 100% at 20% 20%, rgba(210,230,255,0.45), rgba(255,255,255,0.15)); }
+                    30% { background: radial-gradient(120% 100% at 80% 30%, rgba(255,245,220,0.45), rgba(255,255,255,0.18)); }
+                    60% { background: radial-gradient(120% 100% at 50% 60%, rgba(230,240,255,0.42), rgba(255,255,255,0.15)); }
+                    100% { background: radial-gradient(120% 100% at 20% 20%, rgba(210,230,255,0.45), rgba(255,255,255,0.15)); }
+                  }
+                `}</style>
+                <div className="absolute inset-0 pointer-events-none z-[99998]" style={{ background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(2px)' }} />
+                <div className="absolute inset-0 pointer-events-none z-[99999]" style={{ animation: 'dayNightCycle 6s ease-in-out infinite', mixBlendMode: 'overlay', backdropFilter: 'blur(2px)' }} />
+                {/* Loader animation on top */}
+                <div className="absolute inset-0 pointer-events-none z-[100000]" style={{ zIndex: 100000 }}>
+                  <BlossomLoader show={true} />
+                </div>
+              </>
+            )}
           </div>
         </motion.div>
 
@@ -772,6 +844,35 @@ function WorldMapSection() {
                           </div>
                         </div>
                       </div>
+
+                      {/* Backend NDVI thumbnail and forecast (if available) */}
+                      {selectedLocation.backend && (
+                        <div className="bg-white rounded-lg p-4 border">
+                          <h4 className="font-semibold text-gray-800 mb-3">Live NDVI & Forecast</h4>
+                          {selectedLocation.backend.map?.thumbnail_url && (
+                            <div className="mb-3">
+                              <img
+                                src={selectedLocation.backend.map.thumbnail_url}
+                                alt="NDVI thumbnail"
+                                className="w-full h-40 object-cover rounded"
+                              />
+                            </div>
+                          )}
+                          {selectedLocation.backend.forecast && selectedLocation.backend.forecast.length > 0 && (
+                            <div>
+                              <div className="text-sm text-gray-600 mb-2">Next months NDVI (Prophet)</div>
+                              <div className="grid grid-cols-3 gap-2 text-xs">
+                                {selectedLocation.backend.forecast.slice(0,6).map((f, idx) => (
+                                  <div key={idx} className="bg-gray-50 rounded p-2 flex flex-col items-center">
+                                    <div className="font-medium">{f.month}</div>
+                                    <div className="text-gray-700">{Number(f.predicted_ndvi).toFixed(2)}</div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="text-center py-8">
