@@ -7,6 +7,7 @@ import TimelineSection from './components/TimelineSection';
 import FloatingActions from './components/FloatingActions';
 import FlowerCursor from './components/FlowerCursor';
 import LoadingScreen from './components/LoadingScreen';
+import Motion1 from './components/Motion1';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -35,7 +36,8 @@ function App() {
           <FlowerCursor />
           <HeroSection />
           <WorldMapSection />
-          <TimelineSection />
+          <Motion1/>
+          {/* <TimelineSection /> */}
           <FloatingActions />
         </motion.div>
       )}
