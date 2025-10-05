@@ -9,8 +9,8 @@ const TILE_SIZE = 250; // meters
 
 // NASA Earthdata credentials (you'll need to register at https://urs.earthdata.nasa.gov/)
 const NASA_CREDENTIALS = {
-  username: process.env.REACT_APP_NASA_USERNAME || '',
-  password: process.env.REACT_APP_NASA_PASSWORD || ''
+  username: import.meta.env.VITE_NASA_USERNAME || '',
+  password: import.meta.env.VITE_NASA_PASSWORD || ''
 };
 
 /**

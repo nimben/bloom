@@ -6,7 +6,7 @@
 /**
  * Unsplash API configuration
  */
-const UNSPLASH_ACCESS_KEY = process.env.REACT_APP_UNSPLASH_ACCESS_KEY || 'demo_key';
+const UNSPLASH_ACCESS_KEY = import.meta.env.VITE_UNSPLASH_ACCESS_KEY || 'demo_key';
 const UNSPLASH_BASE_URL = 'https://api.unsplash.com';
 
 /**

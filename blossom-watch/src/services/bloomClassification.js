@@ -229,14 +229,16 @@ function assessDataQuality(ndviData) {
 /**
  * Compare current bloom status with historical data
  */
-export function compareWithHistorical(currentBloom, historicalData) {
+export function compareWithHistorical(currentBloom, historicalData) 
+{
   if (!historicalData || historicalData.length === 0) {
     return {
       trend: 'Unknown',
       comparison: 'No historical data available',
       percentile: null
-  };
-  
+    };
+  }
+
   const currentNDVI = currentBloom.ndvi;
   const historicalNDVIs = historicalData.map(d => d.ndvi);
   
