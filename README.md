@@ -25,7 +25,7 @@ The project is divided into two main components:
 * Python **3.10+**
 * Node.js **16+**
 * Google Earth Engine account (for NDVI data)
-* Gemini API key (for chatbot functionality)
+* Buildin AI (for chatbot functionality)
 
 ### **Installation**
 
